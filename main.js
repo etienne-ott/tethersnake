@@ -1,24 +1,48 @@
 var Snake = function() {
-    this.speed = 6.0
-    this.mass = 3.0
-    this.x = 200
-    this.y = 30
+    this.speed = 360.0 // px per s
+    this.mass = 0.001 // really more of force constant
+    this.x = 200 // head pos y
+    this.y = 30  // head pos x
     this.vx = this.speed * 0.5
     this.vy = this.speed * 0.5
     this.radius = 10
 }
 
-Snake.prototype.update = function(mouse) {
+Snake.prototype.update = function(mouse, dt) {
+    // leap-frog kick-drift-kick form for symplectic integration
+    // v_half = v_i + 0.5 * a_i * dt
+    // x_i+1 = x_i + v_half * dt
+    // v_i+1 = v_half + 0.5 * a_i+1 * dt
+    //
+    // force is constant in strength, but points to pointer
+    // velocity is rescaled to constant speed (does this break integration? idk)
+
+    // a_i
     let dx = mouse.x - this.x
     let dy = mouse.y - this.y
-    let l = Math.sqrt(dx*dx+dy*dy)
-    this.vx += dx / (l * this.mass)
-    this.vy += dy / (l * this.mass)
+    let l = Math.max(0.0001, Math.sqrt(dx*dx+dy*dy))
+    let ax = dx / (l * this.mass)
+    let ay = dy / (l * this.mass)
+    // v_half
+    let v_half_x = this.vx + 0.5 * ax * dt
+    let v_half_y = this.vy + 0.5 * ay * dt
+    l = Math.sqrt(v_half_x * v_half_x + v_half_y * v_half_y)
+    let c = dt * this.speed / l
+    // x_i+1
+    this.x += v_half_x * c
+    this.y += v_half_y * c
+    // a_i+1
+    dx = mouse.x - this.x
+    dy = mouse.y - this.y
+    l = Math.max(0.0001, Math.sqrt(dx*dx+dy*dy))
+    ax = dx / (l * this.mass)
+    ay = dy / (l * this.mass)
+    // v_i+1
+    this.vx = v_half_x + 0.5 * ax * dt
+    this.vy = v_half_y + 0.5 * ay * dt
     l = Math.sqrt(this.vx * this.vx + this.vy * this.vy)
-    this.vx = this.speed * this.vx / l
-    this.vy = this.speed * this.vy / l
-    this.x += this.vx
-    this.y += this.vy
+    this.vx *= this.speed / l
+    this.vy *= this.speed / l
 }
 
 Snake.prototype.draw = function(ctx) {
