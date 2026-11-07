@@ -81,18 +81,29 @@ var SwingbyGameState = function() {
     this.mouse = new Pointer(this.canvas)
     this.snake = new Snake()
     this.bounds = new BoundingArea(this.canvas)
+    this.last_ts = performance.now()
 }
 
 SwingbyGameState.prototype.init = function() {
     document.addEventListener("mousemove", function(e) {
         this.mouse.mouse_move(e, this.canvas, this.bounds)
     }.bind(this))
+
+    // start update and draw loops separately
+    swingby_gamestate.update(this.last_ts)
+    swingby_gamestate.draw()
+}
+
+SwingbyGameState.prototype.update = function(new_ts) {
+    let dt = (new_ts - this.last_ts) * 0.001
+    this.snake.update(this.mouse, dt)
+    this.last_ts = new_ts
+    requestAnimationFrame((ts) => this.update(ts))
 }
 
 SwingbyGameState.prototype.draw = function() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-    this.snake.update(this.mouse)
     this.bounds.draw(this.ctx)
     this.mouse.draw(this.ctx)
     this.snake.draw(this.ctx)
@@ -102,4 +113,3 @@ SwingbyGameState.prototype.draw = function() {
 
 var swingby_gamestate = new SwingbyGameState()
 swingby_gamestate.init()
-swingby_gamestate.draw()
