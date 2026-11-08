@@ -3,6 +3,7 @@ var Snake = function() {
     this.mass = 0.001 // really more of force constant
     this.x = 200 // head pos y
     this.y = 30  // head pos x
+    this.positions = []
     this.vx = this.speed * 0.5
     this.vy = this.speed * 0.5
     this.radius = 10
@@ -43,11 +44,26 @@ Snake.prototype.update = function(mouse, dt) {
     l = Math.sqrt(this.vx * this.vx + this.vy * this.vy)
     this.vx *= this.speed / l
     this.vy *= this.speed / l
+
+    // record last 100 positions
+    this.positions.unshift([this.x, this.y])
+    if (this.positions.length > 100) {
+        this.positions.pop()
+    }
 }
 
 Snake.prototype.draw = function(ctx, bounds) {
     const x = Math.max(0, Math.min(ctx.canvas.width, this.x))
     const y = Math.max(0, Math.min(ctx.canvas.height, this.y))
+
+    // draw body
+    for(let i = 0; i < this.positions.length; i+=3) {
+        ctx.beginPath()
+        ctx.arc(this.positions[i][0], this.positions[i][1], this.radius * 0.75, 0, Math.PI * 2)
+        ctx.fillStyle = "#da3535"
+        ctx.fill()
+        ctx.closePath()
+    }
 
     if (x > 0 && x < ctx.canvas.width && y > 0 && y < ctx.canvas.height) {
         // draw only head
