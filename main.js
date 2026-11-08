@@ -45,12 +45,30 @@ Snake.prototype.update = function(mouse, dt) {
     this.vy *= this.speed / l
 }
 
-Snake.prototype.draw = function(ctx) {
-    ctx.beginPath()
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-    ctx.fillStyle = "red"
-    ctx.fill()
-    ctx.closePath()
+Snake.prototype.draw = function(ctx, bounds) {
+    const x = Math.max(0, Math.min(ctx.canvas.width, this.x))
+    const y = Math.max(0, Math.min(ctx.canvas.height, this.y))
+
+    if (x > 0 && x < ctx.canvas.width && y > 0 && y < ctx.canvas.height) {
+        // draw only head
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+        ctx.fillStyle = "red"
+        ctx.fill()
+        ctx.closePath()
+    } else {
+        // draw both head and indicator, but the former may be outside canvas
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+        ctx.fillStyle = "red"
+        ctx.fill()
+        ctx.closePath()
+        ctx.beginPath()
+        ctx.arc(x, y, this.radius * 0.65, 0, Math.PI * 2)
+        ctx.fillStyle = "#ff7637"
+        ctx.fill()
+        ctx.closePath()
+    }
 }
 
 var Pointer = function(canvas) {
@@ -68,9 +86,10 @@ Pointer.prototype.mouse_move = function(event, canvas, bounds) {
     this.y = clamped[1]
 }
 
-Pointer.prototype.draw = function(ctx) {
+Pointer.prototype.draw = function(ctx, bounds) {
     ctx.beginPath()
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+    const clamped = bounds.clamp(this.x, this.y)
+    ctx.arc(clamped[0], clamped[1], this.radius, 0, Math.PI * 2)
     ctx.fillStyle = "blue"
     ctx.fill()
     ctx.closePath()
@@ -129,8 +148,8 @@ SwingbyGameState.prototype.draw = function() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     this.bounds.draw(this.ctx)
-    this.mouse.draw(this.ctx)
-    this.snake.draw(this.ctx)
+    this.mouse.draw(this.ctx, this.bounds)
+    this.snake.draw(this.ctx, this.bounds)
 
     requestAnimationFrame(() => this.draw())
 }
