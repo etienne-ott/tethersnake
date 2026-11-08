@@ -1,3 +1,19 @@
+function fill_circle(ctx, x, y, radius, fill_style) {
+    ctx.beginPath()
+    ctx.arc(x, y, radius, 0, Math.PI * 2)
+    ctx.fillStyle = fill_style
+    ctx.fill()
+    ctx.closePath()
+}
+
+function stroke_circle(ctx, x, y, radius, stroke_style) {
+    ctx.beginPath()
+    ctx.arc(x, y, radius, 0, Math.PI * 2)
+    ctx.strokeStyle = stroke_style
+    ctx.stroke()
+    ctx.closePath()
+}
+
 var Snake = function() {
     this.speed = 360.0 // px per s
     this.mass = 0.001 // really more of force constant
@@ -58,32 +74,16 @@ Snake.prototype.draw = function(ctx, bounds) {
 
     // draw body
     for(let i = 0; i < this.positions.length; i+=3) {
-        ctx.beginPath()
-        ctx.arc(this.positions[i][0], this.positions[i][1], this.radius * 0.75, 0, Math.PI * 2)
-        ctx.fillStyle = "#da3535"
-        ctx.fill()
-        ctx.closePath()
+        fill_circle(ctx, this.positions[i][0], this.positions[i][1], this.radius * 0.75, "#da3535")
     }
 
     if (x > 0 && x < ctx.canvas.width && y > 0 && y < ctx.canvas.height) {
         // draw only head
-        ctx.beginPath()
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-        ctx.fillStyle = "red"
-        ctx.fill()
-        ctx.closePath()
+        fill_circle(ctx, this.x, this.y, this.radius, "red")
     } else {
         // draw both head and indicator, but the former may be outside canvas
-        ctx.beginPath()
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-        ctx.fillStyle = "red"
-        ctx.fill()
-        ctx.closePath()
-        ctx.beginPath()
-        ctx.arc(x, y, this.radius * 0.65, 0, Math.PI * 2)
-        ctx.fillStyle = "#ff7637"
-        ctx.fill()
-        ctx.closePath()
+        fill_circle(ctx, this.x, this.y, this.radius, "red")
+        fill_circle(ctx, x, y, this.radius * 0.65, "#ff7637")
     }
 }
 
@@ -103,12 +103,8 @@ Pointer.prototype.mouse_move = function(event, canvas, bounds) {
 }
 
 Pointer.prototype.draw = function(ctx, bounds) {
-    ctx.beginPath()
     const clamped = bounds.clamp(this.x, this.y)
-    ctx.arc(clamped[0], clamped[1], this.radius, 0, Math.PI * 2)
-    ctx.fillStyle = "blue"
-    ctx.fill()
-    ctx.closePath()
+    fill_circle(ctx, clamped[0], clamped[1], this.radius, "blue")
 }
 
 var BoundingArea = function(canvas) {
@@ -118,11 +114,7 @@ var BoundingArea = function(canvas) {
 }
 
 BoundingArea.prototype.draw = function(ctx) {
-    ctx.beginPath()
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-    ctx.strokeStyle = "black"
-    ctx.stroke()
-    ctx.closePath()
+    stroke_circle(ctx, this.x, this.y, this.radius, "black")
 }
 
 BoundingArea.prototype.clamp = function(x, y) {
