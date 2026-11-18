@@ -126,12 +126,42 @@ BoundingArea.prototype.clamp = function(x, y) {
     return [x, y]
 }
 
+var CollectiblesController = function(canvas) {
+    this.active_collectibles = []
+    this.active_at_a_time = 2
+    this.radius = 5
+
+    // init collectibles
+    this.create_collectibles(canvas)
+}
+
+CollectiblesController.prototype.create_collectibles = function(canvas) {
+    while(this.active_collectibles.length < this.active_at_a_time) {
+        const x = Math.min(0.9, Math.max(0.1, Math.random())) * canvas.width
+        const y = Math.min(0.9, Math.max(0.1, Math.random())) * canvas.height
+        this.active_collectibles.push([x, y])
+    }
+}
+
+CollectiblesController.prototype.draw = function(ctx) {
+    for(let i = 0; i < this.active_collectibles.length; i+=1) {
+        fill_circle(
+            ctx,
+            this.active_collectibles[i][0],
+            this.active_collectibles[i][1],
+            this.radius,
+            "#d8d800"
+        )
+    }
+}
+
 var SwingbyGameState = function() {
     this.canvas = document.getElementById("swingby-canvas")
     this.ctx = this.canvas.getContext("2d")
     this.mouse = new Pointer(this.canvas)
     this.snake = new Snake()
     this.bounds = new BoundingArea(this.canvas)
+    this.collectibles = new CollectiblesController(this.canvas)
     this.last_ts = performance.now()
 }
 
@@ -156,6 +186,7 @@ SwingbyGameState.prototype.draw = function() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     this.bounds.draw(this.ctx)
+    this.collectibles.draw(this.ctx)
     this.mouse.draw(this.ctx, this.bounds)
     this.snake.draw(this.ctx, this.bounds)
 
